@@ -106,10 +106,15 @@ npx playwright install chromium
 
 ### 5. Run the tests and open the Allure report
 
+Windows
 ```bash
 npx playwright test --headed ; npm run allure:generate ; npm run allure:open
 ```
 
+MacOS
+```bash
+npx playwright test --headed && npm run allure:generate && npm run allure:open
+```
 The report opens automatically at `http://127.0.0.1:<port>` in your default browser.
 
 ---
