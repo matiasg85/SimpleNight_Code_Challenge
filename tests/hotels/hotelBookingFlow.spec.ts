@@ -1,5 +1,5 @@
 import { test, expect } from '../fixtures/baseFixture';
-import { HOTEL_SEARCH, HOTEL_FILTERS } from '../../src/data/searchData';
+import { HOTEL_SEARCH, HOTEL_FILTERS, HOTEL_CATEGORY } from '../../src/data/hotelData';
 
 /**
  * Hotel Booking Flow
@@ -14,13 +14,13 @@ import { HOTEL_SEARCH, HOTEL_FILTERS } from '../../src/data/searchData';
  *  6. Zoom in and select a single hotel from the map.
  *  7. Validate that the hotel card's price and guest score satisfy the filters.
  */
-test.describe('Hotel booking flow', () => {
+test.describe('Hotel search', () => {
   // All tests in this suite hit the live staging site with map interactions
   // (tile loading + cluster-click drill-down) — extend the per-test budget.
   test.describe.configure({ timeout: 120_000 });
 
   test(
-    'search Miami hotels, apply map filters, and validate hotel card',
+    'given price range and guest score filters are applied on map view, the hotel card should satisfy both filters',
     async ({ page, homePage, hotelCategoryPage, hotelResultsPage }) => {
 
       // ── Step 1: Go to the staging homepage ─────────────────────────────────
@@ -28,14 +28,14 @@ test.describe('Hotel booking flow', () => {
       await expect(page).toHaveTitle(/.+/, { timeout: 15_000 });
 
       // ── Step 2: Select the Hotels category ─────────────────────────────────
-      await homePage.navBar.selectCategory('Hotels');
+      await homePage.navBar.selectCategory(HOTEL_CATEGORY);
       await hotelCategoryPage.waitForReady();
 
       // ── Step 3: Fill the search form and submit ─────────────────────────────
       await hotelCategoryPage.searchWidget.fillLocation(HOTEL_SEARCH.location);
       await hotelCategoryPage.searchWidget.selectDates(HOTEL_SEARCH.dateRange);
       await hotelCategoryPage.searchWidget.setGuests(HOTEL_SEARCH.guests);
-      await hotelCategoryPage.searchWidget.submit();
+      await hotelCategoryPage.submitSearch();
 
       // ── Step 4: Switch to Map view ──────────────────────────────────────────
       await hotelResultsPage.switchToMapView();

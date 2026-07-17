@@ -25,4 +25,13 @@ export class HotelCategoryPage extends BasePage {
   async waitForReady(): Promise<void> {
     await this.searchWidget.waitForVisible();
   }
+
+  /**
+   * Submit the search form and wait for the hotel results page to load.
+   * Keeps URL-navigation concerns in the page object rather than the widget.
+   */
+  async submitSearch(): Promise<void> {
+    await this.searchWidget.submit();
+    await this.page.waitForURL(/\/search\/hotels/, { timeout: 30_000 });
+  }
 }

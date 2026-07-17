@@ -41,6 +41,10 @@ export default defineConfig({
     navigationTimeout: 30_000,
   },
 
+  // Global per-test timeout safety net. Spec-level describe.configure({ timeout })
+  // overrides this value, so suites with map interactions keep their 120 s budget.
+  timeout: 60_000,
+
   projects: [
     {
       name: 'chromium',

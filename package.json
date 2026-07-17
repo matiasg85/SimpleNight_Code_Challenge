@@ -4,9 +4,10 @@
   "description": "Playwright + TypeScript test-automation framework for Simplenight",
   "private": true,
   "scripts": {
-    "test": "playwright test",
+    "test": "node -e \"require('fs').rmSync('allure-results',{recursive:true,force:true})\" && playwright test",
     "test:hotels": "playwright test tests/hotels/",
-    "test:headed": "playwright test --headed",
+    "test:flights": "playwright test tests/flights/",
+    "test:headed": "node -e \"require('fs').rmSync('allure-results',{recursive:true,force:true})\" && playwright test --headed",
     "test:debug": "playwright test --debug",
     "test:ui": "playwright test --ui",
     "test:staging": "cross-env TEST_ENV=staging playwright test",

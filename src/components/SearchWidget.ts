@@ -1,7 +1,8 @@
 ﻿import { expect, type Page } from '@playwright/test';
 import { GuestSelector } from './GuestSelector';
-import type { HotelSearchParams, DateRange, GuestConfig } from '../data/types';
+import type { DateRange, GuestConfig } from '../data/types';
 import { getMonthAndYear, getDayOfMonth } from '../utils/dateUtils';
+import { fillAutocompleteField } from '../utils/pageHelpers';
 
 /**
  * Mantine DatePicker 2-column behavior (confirmed via DOM inspection):
@@ -48,21 +49,12 @@ export class SearchWidget {
   }
 
   async fillLocation(location: string): Promise<void> {
-    await this.page.locator(this.sel('location_trigger')).first().click();
-    // Wait for the popup input to appear inside the popover
-    const input = this.page.locator(this.sel('location_input')).first();
-    await input.waitFor({ state: 'visible', timeout: 10_000 });
-    // Wait for the Mantine popover animation to settle — input must be interactive
-    await expect(input).toBeEnabled({ timeout: 5_000 });
-    // Fill fires the React onChange which triggers the autocomplete API call
-    await input.fill(location);
-    // Wait for the dropdown options to load (API call + render)
-    const option = this.page
-      .getByRole('option')
-      .filter({ hasText: new RegExp(location, 'i') })
-      .first();
-    await option.waitFor({ state: 'visible', timeout: 20_000 });
-    await option.click();
+    await fillAutocompleteField(
+      this.page,
+      this.page.locator(this.sel('location_trigger')),
+      this.page.locator(this.sel('location_input')),
+      location,
+    );
   }
 
   async selectDates(dateRange: DateRange): Promise<void> {
@@ -116,7 +108,18 @@ export class SearchWidget {
   }
 
   async setGuests(guests: GuestConfig): Promise<void> {
-    await this.page.locator(this.sel('guests_trigger')).first().click();
+    // Different form types name this trigger differently:
+    //   Hotels  → guests_trigger
+    //   Flights → passengers_trigger  (or travelers_trigger)
+    // Use a CSS selector list so the first match wins regardless of form type.
+    const trigger = this.page.locator(
+      [
+        this.sel('guests_trigger'),
+        this.sel('passengers_trigger'),
+        this.sel('travelers_trigger'),
+      ].join(', '),
+    ).first();
+    await trigger.click();
     await this.page
       .locator('[role="dialog"]')
       .last()
@@ -125,8 +128,9 @@ export class SearchWidget {
   }
 
   async submit(): Promise<void> {
+    // Click the Search button. Navigation waiting is handled by the caller
+    // (e.g. HotelCategoryPage.submitSearch) so this widget stays category-agnostic.
     await this.page.getByRole('button', { name: /^search$/i }).click();
-    await this.page.waitForURL(/\/search\/hotels/, { timeout: 30_000 });
   }
 
   private async navigateCalendarToMonth(
@@ -147,7 +151,18 @@ export class SearchWidget {
 
     const monthsDiff =
       (targetYear - currYear) * 12 + (targetMonthIdx - currMonthIdx);
-    if (monthsDiff <= 0) return;
+    if (monthsDiff === 0) return;
+
+    // Navigate backward if the target is earlier than the current panel
+    if (monthsDiff < 0) {
+      const backsNeeded = Math.abs(monthsDiff);
+      for (let i = 0; i < backsNeeded; i++) {
+        const currentText = await heading.textContent();
+        await this.page.locator('button[data-direction="previous"]').first().click();
+        await expect(heading).not.toHaveText(currentText ?? '', { timeout: 5_000 });
+      }
+      return;
+    }
 
     const nextsNeeded = Math.ceil(monthsDiff / 2);
     const needPrevious = monthsDiff % 2 === 1;

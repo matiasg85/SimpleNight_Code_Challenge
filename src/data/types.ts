@@ -17,7 +17,7 @@ export interface DateRange {
 
 export interface GuestConfig {
   adults: number;
-  children: ChildGuest[];
+  children?: ChildGuest[];
 }
 
 export interface ChildGuest {
@@ -54,4 +54,26 @@ export const GUEST_SCORE_THRESHOLDS: Record<GuestScore, number> = {
 export interface HotelFilterParams {
   priceRange: PriceRange;
   guestScore: GuestScore;
+}
+
+// ---------------------------------------------------------------------------
+// Flight types
+// ---------------------------------------------------------------------------
+
+/** Search inputs for a flight query */
+export interface FlightSearchParams {
+  origin: string;
+  destination: string;
+  dateRange: DateRange;
+  guests: GuestConfig;
+  tripType: 'roundtrip' | 'oneway';
+}
+
+/** Filter and sort inputs for the flight results page */
+export interface FlightFilterParams {
+  /** 0 = nonstop, 1 = 1 stop, 2 = 2+ stops */
+  stops: number;
+  /** Airline display name, e.g. 'American Airlines' */
+  airline: string;
+  sortBy: 'price' | 'duration' | 'departure';
 }

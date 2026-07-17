@@ -47,7 +47,7 @@ export class GuestSelector {
 
     // If no children were added, the dialog is still open — close it
     if (children.length === 0) {
-      await this.closDialog();
+      await this.closeDialog();
     }
     // With children: the dialog auto-closes after the last age selection
   }
@@ -66,20 +66,12 @@ export class GuestSelector {
   }
 
   /** Close the guests popover when no children were added (no auto-close). */
-  private async closDialog(): Promise<void> {
-    // Click somewhere outside the dialog to dismiss it
-    await this.page.locator('[data-testid*="dates_trigger"]').first().click();
-    // Wait for the dates calendar to open so we can close it cleanly
+  private async closeDialog(): Promise<void> {
+    // Press Escape to dismiss the Mantine popover — avoids triggering unrelated UI
+    await this.page.keyboard.press('Escape');
     await this.page
-      .locator('[data-testid*="dates_calendar"]')
-      .first()
-      .waitFor({ state: 'visible', timeout: 5_000 })
+      .waitForFunction(() => document.getAnimations().every(a => a.playState !== 'running'), { timeout: 2_000 })
       .catch(() => {});
-    // Close the dates dialog that may have opened
-    const doneBtn = this.page.getByRole('button', { name: 'Done' });
-    if (await doneBtn.isVisible()) {
-      await doneBtn.click();
-    }
   }
 }
 

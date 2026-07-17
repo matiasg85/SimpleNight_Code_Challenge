@@ -28,11 +28,16 @@ export class MapView {
   /** Assert that the map canvas is visible */
   async waitForVisible(): Promise<void> {
     await expect(this.mapContainer).toBeVisible({ timeout: 15_000 });
-    // Wait for map tiles / initial render to settle
+    // Wait for cluster markers (pure-number buttons, e.g. "24") to appear —
+    // this is the true signal that the map has loaded its hotel data and is
+    // ready to interact with. Individual price buttons may also satisfy this.
     await this.page
-      .waitForLoadState('networkidle')
+      .getByRole('button')
+      .filter({ hasText: /^\d+$|\$[\d,]+/ })
+      .first()
+      .waitFor({ state: 'visible', timeout: 20_000 })
       .catch(() => {
-        /* best-effort */
+        // Some zoom levels show no clusters — proceed and let selectFirstHotel handle it
       });
   }
 
@@ -56,10 +61,10 @@ export class MapView {
       await this.page.mouse.move(cx, cy);
       for (let i = 0; i < times; i++) {
         await this.page.mouse.wheel(0, -300);
-        // Wait for tile network activity to settle rather than a fixed pause
+        // Wait for the map's CSS zoom animation to finish before the next scroll
         await this.page
-          .waitForLoadState('networkidle', { timeout: 3_000 })
-          .catch(() => { /* tiles may keep loading — proceed anyway */ });
+          .waitForFunction(() => document.getAnimations().every(a => a.playState !== 'running'), { timeout: 2_000 })
+          .catch(() => {});
       }
     }
   }
@@ -121,7 +126,10 @@ export class MapView {
     }
 
     await priceMarker.waitFor({ state: 'visible', timeout: 15_000 });
-    await priceMarker.click();
+    // gmp-advanced-marker is a Google Maps Web Component that re-renders
+    // continuously while the map tiles load — Playwright's stability check
+    // times out on it. Firing the native DOM click() bypasses that check.
+    await priceMarker.evaluate(el => (el as HTMLElement).click());
 
     // The hotel card may render as a popup, a drawer, a dialog, or an article
     await this.page

@@ -94,11 +94,9 @@ export class FilterPanel {
     await option.scrollIntoViewIfNeeded();
     await option.click();
 
-    // Allow results to refresh after the filter is applied
+    // Wait for the filter selection animation to complete before proceeding
     await this.page
-      .waitForLoadState('networkidle')
-      .catch(() => {
-        /* best-effort; SPA may not trigger a network request */
-      });
+      .waitForFunction(() => document.getAnimations().every(a => a.playState !== 'running'), { timeout: 2_000 })
+      .catch(() => {});
   }
 }

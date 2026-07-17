@@ -49,15 +49,32 @@ export class HotelCard {
 
   /**
    * Extract the numeric guest score.
-   * Parses "10.0 Excellent" / "8.5 Very Good" from the card text.
+   *
+   * Strategy (in order):
+   *  1. Look for a dedicated score element by data-testid / class name that
+   *     starts with a digit — reads the value the site explicitly renders for
+   *     this purpose, immune to text-layout changes.
+   *  2. Fall back to the labeled-number pattern in the full card text
+   *     (e.g. "8.5 Very Good").
+   *  3. Return 0 if neither is found — no random-number guessing.
    */
   async getGuestScore(): Promise<number> {
     await this.waitForVisible();
+
+    // Strategy 1: dedicated score element
+    const scoreEl = this.card
+      .locator('[data-testid*="score" i], [class*="score" i], [class*="rating" i]')
+      .filter({ hasText: /^\d/ })
+      .first();
+    if ((await scoreEl.count()) > 0) {
+      const n = parseFloat((await scoreEl.textContent()) ?? '');
+      if (!isNaN(n) && n >= 0 && n <= 10) return n;
+    }
+
+    // Strategy 2: labeled number pattern — "10.0 Exceptional", "8.5 Very Good", etc.
     const text = (await this.card.textContent()) ?? '';
-    // Pattern: "<number> <label>" e.g. "10.0 Excellent"
-    const match = text.match(/(\d+(?:\.\d+)?)\s+(?:Excellent|Very Good|Good|Average)/i);
-    if (match) return parseFloat(match[1]);
-    return HotelCard.parseScore(text);
+    const match = text.match(/(\d+(?:\.\d+)?)\s+(?:Exceptional|Excellent|Very Good|Good)/i);
+    return match ? parseFloat(match[1]) : 0;
   }
 
   // ---------------------------------------------------------------------------
@@ -99,12 +116,6 @@ export class HotelCard {
   /** Strip currency symbols and commas, then return the first numeric value */
   private static parsePrice(text: string): number {
     const match = text.replace(/,/g, '').match(/\$?(\d+(?:\.\d+)?)/);
-    return match ? parseFloat(match[1]) : 0;
-  }
-
-  /** Extract the first decimal number from text (e.g. "8.5 Very Good" → 8.5) */
-  private static parseScore(text: string): number {
-    const match = text.match(/(\d+(?:\.\d+)?)/);
     return match ? parseFloat(match[1]) : 0;
   }
 }

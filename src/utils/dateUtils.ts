@@ -24,3 +24,14 @@ export function getMonthAndYear(isoDate: string): { month: string; year: number 
 export function getDayOfMonth(isoDate: string): number {
   return new Date(`${isoDate}T00:00:00`).getDate();
 }
+
+/**
+ * Returns an ISO date string (YYYY-MM-DD) for a date that is `days` from today.
+ * Used by data files to keep search dates perpetually in the future.
+ * @example daysFromNow(30) → '2026-08-15' (if today is 2026-07-16)
+ */
+export function daysFromNow(days: number): string {
+  const d = new Date();
+  d.setDate(d.getDate() + days);
+  return d.toISOString().split('T')[0];
+}

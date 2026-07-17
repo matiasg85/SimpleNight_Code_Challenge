@@ -2,6 +2,8 @@ import { test as base } from '@playwright/test';
 import { HomePage } from '../../src/pages/HomePage';
 import { HotelCategoryPage } from '../../src/pages/hotels/HotelCategoryPage';
 import { HotelResultsPage } from '../../src/pages/hotels/HotelResultsPage';
+import { FlightCategoryPage } from '../../src/pages/flights/FlightCategoryPage';
+import { FlightResultsPage } from '../../src/pages/flights/FlightResultsPage';
 
 /**
  * Custom fixture types.
@@ -16,6 +18,8 @@ type PageObjectFixtures = {
   homePage: HomePage;
   hotelCategoryPage: HotelCategoryPage;
   hotelResultsPage: HotelResultsPage;
+  flightCategoryPage: FlightCategoryPage;
+  flightResultsPage: FlightResultsPage;
 };
 
 export const test = base.extend<PageObjectFixtures>({
@@ -29,6 +33,14 @@ export const test = base.extend<PageObjectFixtures>({
 
   hotelResultsPage: async ({ page }, use) => {
     await use(new HotelResultsPage(page));
+  },
+
+  flightCategoryPage: async ({ page }, use) => {
+    await use(new FlightCategoryPage(page));
+  },
+
+  flightResultsPage: async ({ page }, use) => {
+    await use(new FlightResultsPage(page));
   },
 });
 
