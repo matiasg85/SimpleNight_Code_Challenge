@@ -19,8 +19,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-        
-
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -32,6 +30,16 @@ jobs:
 
       - name: Install Playwright Browsers
         run: npx playwright install --with-deps
+
+      - name: Show runner IP
+        run: |
+          echo "Runner IP:"
+          curl https://api.ipify.org
+          echo
+
+      - name: Test site with curl
+        run: |
+          curl -L -v https://wl.stg.simplenight.com
 
       - name: Run Playwright tests
         run: npx playwright test
