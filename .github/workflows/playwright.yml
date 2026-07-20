@@ -32,7 +32,7 @@ jobs:
         run: npx playwright install --with-deps chromium
 
       - name: Run Playwright tests
-        run: npx playwright test --trace
+        run: npx playwright test --trace on
 
       - name: Upload Playwright report
         if: always()
