@@ -28,18 +28,27 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Install Playwright Browsers
+      - name: Install Playwright browsers
         run: npx playwright install --with-deps
 
-      - name: Show runner IP
+      - name: Show runner information
         run: |
-          echo "Runner IP:"
-          curl https://api.ipify.org
+          echo "===== Runner IP ====="
+          curl -s https://api.ipify.org
+          echo
           echo
 
-      - name: Test site with curl
+          echo "===== DNS Resolution ====="
+          nslookup wl.stg.simplenight.com || true
+          echo
+
+      - name: Test access to staging site
         run: |
-          curl -L -v https://wl.stg.simplenight.com
+          echo "===== Curl Verbose Output ====="
+          curl -L -v https://wl.stg.simplenight.com || true
+          echo
+          echo "===== Response Headers ====="
+          curl -I -v https://wl.stg.simplenight.com || true
 
       - name: Run Playwright tests
         run: npx playwright test
