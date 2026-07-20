@@ -35,6 +35,10 @@ export default defineConfig({
       'Accept-Language': 'en-US,en;q=0.9',
       'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
     },
+    viewport: { width: 1440, height: 900 },
+    locale: 'en-US',
+    timezoneId: 'America/New_York',
+    ignoreHTTPSErrors: true,
 
     // Evidence collected on failure and attached automatically by Allure
     trace: 'on-first-retry',
@@ -53,7 +57,16 @@ export default defineConfig({
   projects: [
     {
       name: 'chromium',
-      use: { ...devices['Desktop Chrome'] },
+      use: {
+        ...devices['Desktop Chrome'],
+        launchOptions: {
+          args: [
+            '--disable-blink-features=AutomationControlled',
+            '--disable-dev-shm-usage',
+            '--no-sandbox',
+          ],
+        },
+      },
     },
   ],
 });
