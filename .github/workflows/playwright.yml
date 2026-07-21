@@ -31,7 +31,7 @@ jobs:
       - name: Install Playwright browsers
         run: npx playwright install --with-deps
 
-      - name: Show runner information
+      - name: Show runner information1
         run: |
           echo "===== Runner IP ====="
           curl -s https://api.ipify.org
