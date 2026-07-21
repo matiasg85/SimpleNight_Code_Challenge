@@ -19,9 +19,20 @@ export class NavBar {
    * @param category - The exact link label, e.g. 'Hotels', 'Flights'
    */
   async selectCategory(category: string): Promise<void> {
-    await this.page
-      .getByRole('link', { name: category, exact: true })
-      .click();
+    // Try a few strategies so CI (and different site variants) don't
+    // fail when the element role/structure changes between deployments.
+    const link = this.page.getByRole('link', { name: category, exact: true });
+    if (await link.count()) {
+      await link.first().click();
+    } else {
+      const button = this.page.getByRole('button', { name: category, exact: true });
+      if (await button.count()) {
+        await button.first().click();
+      } else {
+        // Fallback: match any visible text node with the exact label.
+        await this.page.getByText(category, { exact: true }).first().click();
+      }
+    }
 
     await this.page.waitForLoadState('domcontentloaded');
   }

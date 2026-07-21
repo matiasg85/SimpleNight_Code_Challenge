@@ -28,6 +28,8 @@ test.describe('Hotel search', () => {
       await expect(page).toHaveTitle(/.+/, { timeout: 15_000 });
 
       // ── Step 2: Select the Hotels category ─────────────────────────────────
+      await this.page.waitForLoadState('networkidle');
+      //await this.page.getByText(category, { exact: true }).first().click();
       await homePage.navBar.selectCategory(HOTEL_CATEGORY);
       await hotelCategoryPage.waitForReady();
 
