@@ -1,0 +1,59 @@
+name: Page access tests
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+      - master
+  pull_request:
+    branches:
+      - main
+      - master
+
+jobs:
+  playwright:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      
+
+      - name: Show runner information1
+        run: |
+          echo "===== Runner IP ====="
+          curl -s https://www.mercadolibre.com.ar
+          echo
+          echo
+
+          echo "===== DNS Resolution ====="
+          echo off "==== docs ==="
+          nslookup https://www.mercadolibre.com.ar || true
+          echo
+           - name: Show runner information 2
+          run: |
+          echo "===== Runner IP ====="
+          curl -s https://www.facebook.com
+          echo
+          echo
+
+          echo "===== DNS Resolution ====="
+          echo off "==== docs ==="
+          nslookup https://www.facebook.com || true
+          echo
+
+      - name: Test access to staging site
+        run: |
+          echo "===== Curl Verbose Output ====="
+          curl -L -v https://www.mercadolibre.com.ar || true
+          echo
+          echo "===== Response Headers ====="
+          curl -I -v https://www.mercadolibre.com.ar || true
