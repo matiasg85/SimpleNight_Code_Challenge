@@ -39,6 +39,7 @@ jobs:
           echo
 
           echo "===== DNS Resolution ====="
+          echo off "==== docs ==="
           nslookup wl.stg.simplenight.com || true
           echo
 
