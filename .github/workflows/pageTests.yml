@@ -38,17 +38,18 @@ jobs:
           echo off "==== docs ==="
           nslookup https://www.mercadolibre.com.ar || true
           echo
-           - name: Show runner information 2
-          run: |
-          echo "===== Runner IP ====="
-          curl -s https://www.facebook.com
-          echo
-          echo
+          
+      - name: Show runner information 2
+        run: |
+            echo "===== Runner IP ====="
+            curl -s https://www.facebook.com
+            echo
+            echo
 
-          echo "===== DNS Resolution ====="
-          echo off "==== docs ==="
-          nslookup https://www.facebook.com || true
-          echo
+            echo "===== DNS Resolution ====="
+            echo off "==== docs ==="
+            nslookup https://www.facebook.com || true
+            echo
 
       - name: Test access to staging site
         run: |
